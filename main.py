@@ -1,36 +1,43 @@
 """
-ASUS TUF Fan Speed Controller - Main Entry Point
+Universal Laptop Fan Speed Controller - Main Entry Point
+Automatically detects any laptop brand (ASUS, Lenovo, Dell, HP, Acer, MSI, etc.)
 """
 
 import sys
 import os
 import time
 
-# Ensure current directory is on python path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from asus_fan_controller import AsusFanController
+from universal_controller import UniversalFanController
 import server
 
 def show_interactive_menu():
-    ctrl = AsusFanController()
+    ctrl = UniversalFanController()
+    info = ctrl.get_info()
+    hw = info["hardware"]
+
     try:
         while True:
             t = ctrl.get_telemetry()
-            print("\n" + "=" * 54)
-            print("       ASUS TUF FAN CONTROLLER & MAX RPM BOOSTER")
-            print("=" * 54)
+            print("\n" + "=" * 60)
+            print("       UNIVERSAL FAN SPEED CONTROLLER & MAX RPM BOOSTER")
+            print("=" * 60)
+            print(f" LAPTOP  : {hw['manufacturer']} - {hw['model']}")
+            print(f" HARDWARE: {hw['cpu']} | {hw['primary_gpu']}")
+            print(f" DRIVER  : {info['backend']} ({ctrl.vendor.upper()} Engine)")
+            print("-" * 60)
             print(f" CPU Fan : {t['cpu_rpm']} RPM  ({t['cpu_temp']}°C)")
             print(f" GPU Fan : {t['gpu_rpm']} RPM  ({t['gpu_temp']}°C)")
             print(f" Mode    : {t['mode'].upper()}")
-            print("-" * 54)
+            print("-" * 60)
             print(" [1] ⚡ Set MAXIMUM Fan Speed (100% Highest RPM)")
             print(" [2] 🌐 Launch Web Dashboard GUI (Browser)")
             print(" [3] 🔄 Restore Factory Automatic Mode (BIOS)")
             print(" [4] 📊 Live Continuous Telemetry Monitor")
             print(" [5] 🎛️  Set Custom Speed Percentage (30% - 100%)")
             print(" [0] ❌ Exit")
-            print("-" * 54)
+            print("-" * 60)
 
             choice = input("Select an option (0-5): ").strip()
 
@@ -89,10 +96,42 @@ def main():
     cmd = args[0].lower().strip()
     if cmd in ("gui", "web", "dashboard"):
         server.run_server()
+        return
+
+    ctrl = UniversalFanController()
+    if cmd in ("status", "info"):
+        t = ctrl.get_telemetry()
+        hw = t["hardware"]
+        print("\n--- Live Hardware Telemetry ---")
+        print(f"  Laptop Detected : {hw['manufacturer']} - {hw['model']}")
+        print(f"  Processor       : {hw['cpu']}")
+        print(f"  Graphics        : {hw['primary_gpu']}")
+        print(f"  Driver Active   : {ctrl.backend.__class__.__name__}")
+        print(f"  CPU Fan Speed   : {t['cpu_rpm']} RPM")
+        print(f"  GPU Fan Speed   : {t['gpu_rpm']} RPM")
+        print(f"  CPU Temp        : {t['cpu_temp']} °C")
+        print(f"  GPU Temp        : {t['gpu_temp']} °C")
+        print(f"  Fan Mode        : {t['mode'].upper()}")
+        print("-------------------------------\n")
+    elif cmd in ("max", "highest", "full", "overboost", "100"):
+        print("[*] Activating MAXIMUM HIGHEST FAN SPEED (100% PWM Overboost)...")
+        if ctrl.set_max_speed():
+            print("[+] Success: Fans commanded to 100% Maximum Speed.")
+        else:
+            print("[-] Failed to apply max speed.")
+    elif cmd in ("auto", "reset", "bios", "default"):
+        print("[*] Restoring default factory BIOS fan curve...")
+        if ctrl.reset_to_auto():
+            print("[+] Success: Restored to Automatic Factory Mode.")
+        else:
+            print("[-] Failed to restore default curve.")
     else:
-        # Delegate to asus_fan_controller CLI
-        import asus_fan_controller
-        asus_fan_controller.main()
+        if ctrl.set_preset(cmd):
+            print(f"[+] Fan speed mode applied: {cmd}")
+        else:
+            print(f"[-] Unknown command or invalid percentage: {cmd}")
+
+    ctrl.close()
 
 if __name__ == "__main__":
     main()

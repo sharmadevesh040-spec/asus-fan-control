@@ -1,5 +1,5 @@
 """
-ASUS TUF / ROG Fan Controller Web Dashboard Server
+Universal Laptop Fan Controller Web Dashboard Server
 Runs a lightweight, zero-dependency HTTP server with REST API
 """
 
@@ -11,10 +11,9 @@ import sys
 import webbrowser
 import threading
 import time
-from urllib.parse import urlparse, parse_qs
+from urllib.parse import urlparse
 
-# Import the core controller
-from asus_fan_controller import AsusFanController
+from universal_controller import UniversalFanController
 
 PORT = 8990
 WEB_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'web')
@@ -44,6 +43,15 @@ class FanAPIHandler(http.server.SimpleHTTPRequestHandler):
                 data['success'] = True
             except Exception as e:
                 data = {'success': False, 'error': str(e)}
+            self.wfile.write(json.dumps(data).encode('utf-8'))
+
+        elif parsed.path == '/api/system_info':
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json')
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.end_headers()
+            data = controller.get_info()
+            data['success'] = True
             self.wfile.write(json.dumps(data).encode('utf-8'))
         else:
             super().do_GET()
@@ -82,22 +90,23 @@ class FanAPIHandler(http.server.SimpleHTTPRequestHandler):
 
 def run_server():
     global controller
-    print("[*] Initializing ASUS Hardware Controller...")
-    controller = AsusFanController()
-    t = controller.get_telemetry()
-    print(f"[+] Connected to ATKACPI! Initial CPU Fan: {t['cpu_rpm']} RPM, GPU Fan: {t['gpu_rpm']} RPM")
+    print("[*] Detecting laptop hardware...")
+    controller = UniversalFanController()
+    info = controller.get_info()
+    hw = info['hardware']
+    print(f"[+] System Identified: {hw['manufacturer']} - {hw['model']}")
+    print(f"[+] CPU: {hw['cpu']} | GPU: {hw['primary_gpu']}")
+    print(f"[+] Active Driver: {info['backend']}")
 
-    # Reuse address to avoid port conflict
     socketserver.TCPServer.allow_reuse_address = True
     with socketserver.TCPServer(("", PORT), FanAPIHandler) as httpd:
         url = f"http://localhost:{PORT}"
         print(f"\n=======================================================")
-        print(f"  ASUS TUF FAN CONTROL DASHBOARD ONLINE")
+        print(f"  UNIVERSAL FAN CONTROL DASHBOARD ONLINE")
         print(f"  Access URL: {url}")
         print(f"=======================================================\n")
         print("[*] Press Ctrl+C in this window to stop.")
         
-        # Open browser in a separate thread after 1 second
         threading.Timer(1.0, lambda: webbrowser.open(url)).start()
 
         try:

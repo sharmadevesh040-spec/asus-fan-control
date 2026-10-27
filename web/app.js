@@ -75,9 +75,34 @@ function startPolling() {
 }
 
 // Update UI Components
+let hardwareInfoSet = false;
+
 function updateUI(data) {
-  document.getElementById('linkStatus').innerText = 'ONLINE';
+  const hw = data.hardware || {};
+  const vendor = (hw.vendor || 'Universal').toUpperCase();
+  const mfg = (hw.manufacturer || 'System').split(' ')[0].toUpperCase();
+  const model = hw.model || 'Universal Laptop';
+
+  document.getElementById('linkStatus').innerText = `ONLINE (${vendor})`;
   document.getElementById('linkStatus').style.color = '#10b981';
+
+  if (!hardwareInfoSet && hw.model) {
+    document.getElementById('brandSub').innerText = `${mfg} • ${hw.family || model}`;
+    document.getElementById('brandTitle').innerText = `${vendor} FAN MATRIX`;
+    document.getElementById('chipTag').innerText = (hw.model.split(' ')[0] || 'PC').toUpperCase();
+    
+    // Shorten GPU name for tag
+    const gpuShort = (hw.primary_gpu || 'GPU')
+      .replace('NVIDIA GeForce ', '')
+      .replace(' Laptop GPU', '')
+      .replace('AMD Radeon ', '')
+      .replace(' Graphics', '');
+    document.getElementById('gpuTag').innerText = gpuShort;
+
+    if (hw.cpu) document.getElementById('cpuChipName').innerText = hw.cpu;
+    if (hw.primary_gpu) document.getElementById('gpuChipName').innerText = hw.primary_gpu;
+    hardwareInfoSet = true;
+  }
 
   const cpuRpm = data.cpu_rpm || 0;
   const gpuRpm = data.gpu_rpm || 0;

@@ -23,20 +23,20 @@
             <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
           </svg>
           <div class="logo-text">
-            <span class="brand-sub">ASUS TUF GAMING A15</span>
-            <span class="brand-title">FAN CONTROL MATRIX</span>
+            <span class="brand-sub" id="brandSub">LAPTOP FAN MATRIX</span>
+            <span class="brand-title" id="brandTitle">UNIVERSAL CONTROLLER</span>
           </div>
         </div>
         <div class="hardware-pill">
-          <span class="chip-tag">FA506NCR</span>
-          <span class="gpu-tag">RTX 3050</span>
+          <span class="chip-tag" id="chipTag">DETECTING...</span>
+          <span class="gpu-tag" id="gpuTag">GPU</span>
         </div>
       </div>
 
       <div class="header-right">
         <div class="status-indicator" id="statusIndicator">
           <span class="pulse-dot"></span>
-          <span class="status-label">ATKACPI HARDWARE LINK: <strong id="linkStatus">ONLINE</strong></span>
+          <span class="status-label">HARDWARE DRIVER: <strong id="linkStatus">INITIALIZING</strong></span>
         </div>
       </div>
     </header>
@@ -89,7 +89,7 @@
         <div class="card-header">
           <div class="fan-identity">
             <span class="zone-badge cpu-badge">CPU ZONE</span>
-            <span class="chip-name">AMD Ryzen 7</span>
+            <span class="chip-name" id="cpuChipName">AMD Ryzen 7</span>
           </div>
           <div class="temp-display" id="cpuTempBadge">
             <span class="temp-icon">🌡️</span>
@@ -145,7 +145,7 @@
         <div class="card-header">
           <div class="fan-identity">
             <span class="zone-badge gpu-badge">GPU ZONE</span>
-            <span class="chip-name">NVIDIA RTX 3050</span>
+            <span class="chip-name" id="gpuChipName">NVIDIA RTX 3050</span>
           </div>
           <div class="temp-display" id="gpuTempBadge">
             <span class="temp-icon">🌡️</span>
