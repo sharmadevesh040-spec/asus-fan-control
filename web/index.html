@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ASUS TUF // Fan Speed Controller & Max RPM Booster</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="cyber-background"></div>
+  <div class="ambient-glow cyan-glow"></div>
+  <div class="ambient-glow orange-glow"></div>
+
+  <div class="app-container">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-left">
+        <div class="logo-badge">
+          <svg class="tuf-icon" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+          </svg>
+          <div class="logo-text">
+            <span class="brand-sub">ASUS TUF GAMING A15</span>
+            <span class="brand-title">FAN CONTROL MATRIX</span>
+          </div>
+        </div>
+        <div class="hardware-pill">
+          <span class="chip-tag">FA506NCR</span>
+          <span class="gpu-tag">RTX 3050</span>
+        </div>
+      </div>
+
+      <div class="header-right">
+        <div class="status-indicator" id="statusIndicator">
+          <span class="pulse-dot"></span>
+          <span class="status-label">ATKACPI HARDWARE LINK: <strong id="linkStatus">ONLINE</strong></span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Hero Control: MAX SPEED OVERBOOST -->
+    <section class="hero-section">
+      <div class="hero-card" id="heroCard">
+        <div class="hero-info">
+          <div class="hero-title-group">
+            <div class="warning-badge" id="boostBadge">
+              <span class="flame-icon">🔥</span>
+              <span id="boostBadgeText">OVERBOOST READY</span>
+            </div>
+            <h2>MAXIMUM FAN SPEED</h2>
+            <p class="hero-desc">Force 100% PWM Duty Cycle on both blower fans for extreme cooling during heavy gaming and GPU workloads.</p>
+          </div>
+
+          <div class="hero-actions">
+            <button id="btnMaxSpeed" class="btn-max-boost" onclick="triggerMaxSpeed()">
+              <span class="btn-glare"></span>
+              <span class="btn-icon">⚡</span>
+              <span class="btn-label" id="btnMaxLabel">ACTIVATE MAX RPM</span>
+              <span class="btn-subtext">BLAST TO 100% FAN SPEED</span>
+            </button>
+
+            <button id="btnRestoreAuto" class="btn-secondary" onclick="triggerAuto()">
+              <span class="btn-icon">🔄</span>
+              <span>RESTORE AUTO BIOS</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="hero-stats">
+          <div class="stat-box">
+            <span class="stat-label">MAX RATED SPEED</span>
+            <span class="stat-val highlight-val">~5,800+ <small>RPM</small></span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-label">TARGET MODE</span>
+            <span class="stat-val" id="activeModeText">AUTO</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Live Dual Fan Tachometers -->
+    <section class="tachometers-grid">
+      <!-- CPU Fan Card -->
+      <div class="fan-card cpu-card">
+        <div class="card-header">
+          <div class="fan-identity">
+            <span class="zone-badge cpu-badge">CPU ZONE</span>
+            <span class="chip-name">AMD Ryzen 7</span>
+          </div>
+          <div class="temp-display" id="cpuTempBadge">
+            <span class="temp-icon">🌡️</span>
+            <span class="temp-val" id="cpuTempText">--</span><span class="temp-unit">°C</span>
+          </div>
+        </div>
+
+        <div class="tachometer-center">
+          <!-- Circular SVG Gauge -->
+          <div class="gauge-wrapper">
+            <svg class="gauge-svg" viewBox="0 0 200 200">
+              <circle class="gauge-bg" cx="100" cy="100" r="82" />
+              <circle class="gauge-progress cpu-progress" id="cpuProgressCircle" cx="100" cy="100" r="82" />
+            </svg>
+
+            <!-- Center Fan Blade SVG Animation -->
+            <div class="fan-blade-container">
+              <svg class="fan-blade-svg" id="cpuFanBlades" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="14" fill="#0b0e14" stroke="#00f3ff" stroke-width="2"/>
+                <g class="blades" fill="#00f3ff" opacity="0.85">
+                  <path d="M50 36 C42 20 40 10 50 2 C58 12 56 22 50 36 Z"/>
+                  <path d="M60 40 C76 32 86 30 94 40 C84 48 74 46 60 40 Z"/>
+                  <path d="M60 60 C76 68 86 70 94 60 C84 52 74 54 60 60 Z"/>
+                  <path d="M50 64 C42 80 40 90 50 98 C58 88 56 78 50 64 Z"/>
+                  <path d="M40 60 C24 68 14 70 6 60 C16 52 26 54 40 60 Z"/>
+                  <path d="M40 40 C24 32 14 30 6 40 C16 48 26 46 40 40 Z"/>
+                </g>
+                <circle cx="50" cy="50" r="5" fill="#ffffff" />
+              </svg>
+            </div>
+
+            <div class="rpm-overlay">
+              <span class="rpm-number" id="cpuRpmText">----</span>
+              <span class="rpm-unit">RPM</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-footer">
+          <div class="footer-stat">
+            <span>RATED PWM</span>
+            <strong id="cpuPwmText">--%</strong>
+          </div>
+          <div class="footer-stat">
+            <span>STATUS</span>
+            <strong id="cpuStatusText" class="text-cyan">ACTIVE</strong>
+          </div>
+        </div>
+      </div>
+
+      <!-- GPU Fan Card -->
+      <div class="fan-card gpu-card">
+        <div class="card-header">
+          <div class="fan-identity">
+            <span class="zone-badge gpu-badge">GPU ZONE</span>
+            <span class="chip-name">NVIDIA RTX 3050</span>
+          </div>
+          <div class="temp-display" id="gpuTempBadge">
+            <span class="temp-icon">🌡️</span>
+            <span class="temp-val" id="gpuTempText">--</span><span class="temp-unit">°C</span>
+          </div>
+        </div>
+
+        <div class="tachometer-center">
+          <!-- Circular SVG Gauge -->
+          <div class="gauge-wrapper">
+            <svg class="gauge-svg" viewBox="0 0 200 200">
+              <circle class="gauge-bg" cx="100" cy="100" r="82" />
+              <circle class="gauge-progress gpu-progress" id="gpuProgressCircle" cx="100" cy="100" r="82" />
+            </svg>
+
+            <!-- Center Fan Blade SVG Animation -->
+            <div class="fan-blade-container">
+              <svg class="fan-blade-svg" id="gpuFanBlades" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="14" fill="#0b0e14" stroke="#a855f7" stroke-width="2"/>
+                <g class="blades" fill="#a855f7" opacity="0.85">
+                  <path d="M50 36 C42 20 40 10 50 2 C58 12 56 22 50 36 Z"/>
+                  <path d="M60 40 C76 32 86 30 94 40 C84 48 74 46 60 40 Z"/>
+                  <path d="M60 60 C76 68 86 70 94 60 C84 52 74 54 60 60 Z"/>
+                  <path d="M50 64 C42 80 40 90 50 98 C58 88 56 78 50 64 Z"/>
+                  <path d="M40 60 C24 68 14 70 6 60 C16 52 26 54 40 60 Z"/>
+                  <path d="M40 40 C24 32 14 30 6 40 C16 48 26 46 40 40 Z"/>
+                </g>
+                <circle cx="50" cy="50" r="5" fill="#ffffff" />
+              </svg>
+            </div>
+
+            <div class="rpm-overlay">
+              <span class="rpm-number" id="gpuRpmText">----</span>
+              <span class="rpm-unit">RPM</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-footer">
+          <div class="footer-stat">
+            <span>RATED PWM</span>
+            <strong id="gpuPwmText">--%</strong>
+          </div>
+          <div class="footer-stat">
+            <span>STATUS</span>
+            <strong id="gpuStatusText" class="text-purple">ACTIVE</strong>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Controls Section: Manual Slider & Presets -->
+    <section class="controls-section">
+      <!-- Preset Profile Buttons -->
+      <div class="panel-card presets-panel">
+        <h3 class="panel-title">SPEED PRESETS</h3>
+        <div class="presets-grid">
+          <button class="preset-btn" data-mode="max" onclick="setPreset('max')">
+            <span class="p-icon">🚀</span>
+            <span class="p-name">MAX SPEED</span>
+            <span class="p-val">100% (Overboost)</span>
+          </button>
+
+          <button class="preset-btn" data-mode="turbo" onclick="setPreset('turbo')">
+            <span class="p-icon">⚡</span>
+            <span class="p-name">TURBO</span>
+            <span class="p-val">85% Speed</span>
+          </button>
+
+          <button class="preset-btn" data-mode="perf" onclick="setPreset('perf')">
+            <span class="p-icon">🎮</span>
+            <span class="p-name">PERFORMANCE</span>
+            <span class="p-val">70% Speed</span>
+          </button>
+
+          <button class="preset-btn" data-mode="balanced" onclick="setPreset('balanced')">
+            <span class="p-icon">⚖️</span>
+            <span class="p-name">BALANCED</span>
+            <span class="p-val">50% Speed</span>
+          </button>
+
+          <button class="preset-btn" data-mode="silent" onclick="setPreset('silent')">
+            <span class="p-icon">🍃</span>
+            <span class="p-name">QUIET</span>
+            <span class="p-val">30% Speed</span>
+          </button>
+
+          <button class="preset-btn active" data-mode="auto" onclick="setPreset('auto')">
+            <span class="p-icon">🔄</span>
+            <span class="p-name">FACTORY AUTO</span>
+            <span class="p-val">ASUS BIOS Curve</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Precision Manual Slider -->
+      <div class="panel-card slider-panel">
+        <div class="slider-header">
+          <h3 class="panel-title">MANUAL SPEED DIAL</h3>
+          <div class="target-pct-badge">
+            <span id="sliderValueText">100</span><span class="pct-sign">%</span>
+          </div>
+        </div>
+
+        <div class="slider-container">
+          <input type="range" id="manualSlider" min="30" max="100" value="100" step="1" oninput="onSliderMove(this.value)" onchange="applyManualSlider(this.value)">
+          <div class="slider-ticks">
+            <span>30% Quiet</span>
+            <span>50%</span>
+            <span>70%</span>
+            <span>85% Turbo</span>
+            <span>100% Max</span>
+          </div>
+        </div>
+
+        <div class="slider-actions">
+          <button class="btn-apply" onclick="applyCurrentSlider()">APPLY MANUAL SPEED</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Live Telemetry History Chart -->
+    <section class="chart-section">
+      <div class="panel-card chart-panel">
+        <div class="chart-header">
+          <h3 class="panel-title">REAL-TIME RPM TELEMETRY HISTORY</h3>
+          <div class="chart-legend">
+            <span class="legend-item"><span class="legend-color cyan-color"></span> CPU Fan RPM</span>
+            <span class="legend-item"><span class="legend-color purple-color"></span> GPU Fan RPM</span>
+          </div>
+        </div>
+        <div class="canvas-container">
+          <canvas id="telemetryCanvas" width="900" height="180"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer info -->
+    <footer class="footer">
+      <div class="footer-left">
+        <span>ASUS System Control Interface v3 (ATKACPI)</span>
+        <span class="dot-sep">•</span>
+        <span>Keyboard shortcuts: <kbd>M</kbd> Max Speed, <kbd>A</kbd> Auto, <kbd>T</kbd> Turbo</span>
+      </div>
+      <div class="footer-right">
+        <span>High-Performance Direct ACPI Driver</span>
+      </div>
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
